@@ -4,9 +4,11 @@ import classNames from "classnames";
 import { User } from "../types/user";
 import { useAuth } from "../context/auth";
 import { useRouter } from "next/router";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../firebase/client";
 
 const CreateAccount = () => {
-    const { isLoading, isLoggedIn } = useAuth();
+    const { isLoading, fbUser } = useAuth();
     const router = useRouter();
 
     const {
@@ -16,18 +18,20 @@ const CreateAccount = () => {
         formState: { errors },
     } = useForm<User>();
 
-    const onSubmit: SubmitHandler<User> = (data: User) => {
-        console.log(data);
-    };
-
     if (isLoading) {
-        return true;
-    }
-
-    if (!isLoggedIn) {
-        router.push("/login");
         return null;
     }
+    if (!fbUser) {
+        return null;
+    }
+    const onSubmit: SubmitHandler<User> = (data: User) => {
+        console.log(data);
+        const ref = doc(db, `users/${fbUser.uid}`);
+        setDoc(ref, data).then(() => {
+            alert("ユーザーを作成しました。");
+            router.push("/");
+        });
+    };
     return (
         <div className="container">
             <h1>アカウント作成</h1>
