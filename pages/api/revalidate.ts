@@ -14,6 +14,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
 
     try {
         // ここで再生成するページを決める
+        console.log(req.query.path);
         await res.revalidate(req.query.path as string);
         return res.json({ revalidated: true });
     } catch (err) {

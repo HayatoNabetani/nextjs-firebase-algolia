@@ -52,7 +52,12 @@ const PostForm = ({ isEditMode }: { isEditMode: boolean }) => {
             authorId: fbUser.uid,
         };
         setDoc(ref, post).then(() => {
-            alert(`記事を${isEditMode ? "編集" : "投稿"}しました。`);
+            const path = `/posts/${post.id}`;
+            fetch(`/api/revalidate?path=${path}`)
+                .then((res) => res.json())
+                .then((data) => {
+                    alert(`記事を${isEditMode ? "編集" : "投稿"}しました。`);
+                });
         });
     };
 
