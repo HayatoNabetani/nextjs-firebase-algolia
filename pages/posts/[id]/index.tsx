@@ -3,16 +3,17 @@ import { doc, getDoc } from "firebase/firestore";
 import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import useSWR from "swr/immutable";
+import Layout from "../../../components/layout";
 import { useAuth } from "../../../context/auth";
 import { db } from "../../../firebase/client";
 import { adminDb } from "../../../firebase/server";
 import { useUser } from "../../../lib/user";
 import { Post } from "../../../types/post";
 import { User } from "../../../types/user";
+import { NextPageWithLayout } from "../../_app";
 
-/* ここはnodejsの領域なので、/firebase/clientは使わないように！ */
 export const getStaticProps: GetStaticProps<{
     post: Post;
 }> = async (context) => {
@@ -27,20 +28,6 @@ export const getStaticProps: GetStaticProps<{
     };
 };
 
-/*
-あらかじめ、記事IDがあるのは事前に教えてよ〜〜〜
-ただ、頻繁にこういうのがある時は、わからん
-ビルドの旅に数万の記事をビルドするのは現実的ではない
-よって paths : []
-
-ローディングしますか？
-fallback: true
-これはページがないなら404
-fallback: false
-白い画面だよ
-fallback: 'blocking'
-*/
-
 export const getStaticPaths: GetStaticPaths = async (context) => {
     return {
         paths: [],
@@ -48,7 +35,7 @@ export const getStaticPaths: GetStaticPaths = async (context) => {
     };
 };
 
-const PostDetailPage = ({
+const PostDetailPage: NextPageWithLayout = ({
     post,
 }: InferGetStaticPropsType<typeof getStaticProps>) => {
     const user = useUser(post?.authorId);
@@ -77,6 +64,10 @@ const PostDetailPage = ({
             {isAuthor && <Link href={`/posts/${post.id}/edit`}>編集</Link>}
         </div>
     );
+};
+
+PostDetailPage.getLayout = function getLayout(page: ReactElement) {
+    return <Layout>{page}</Layout>;
 };
 
 export default PostDetailPage;
