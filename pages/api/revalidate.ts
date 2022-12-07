@@ -1,4 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import { cert, initializeApp } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 type Data =
@@ -13,11 +15,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
     // }
 
     try {
-        // ここで再生成するページを決める
-        console.log(req.query.path);
+        // "Bearer xxxxx"
+
+        // todo : 最初だけinitializeAppしないといけないのか、調査
+        // initializeApp({
+        //     credential: cert(
+        //         JSON.parse(process.env.FIREBASE_ADMIN_KEY as string)
+        //     ),
+        // });
+        const token = req.headers.authorization?.split(" ")?.[1] as string;
+        await getAuth().verifyIdToken(token);
         await res.revalidate(req.query.path as string);
         return res.json({ revalidated: true });
-    } catch (err) {
+    } catch (e) {
+        console.log(e);
         return res.status(500).send("Error revalidating");
     }
 };

@@ -3,7 +3,7 @@ import Button from "../components/button";
 import { Post } from "../types/post";
 import classNames from "classnames";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "../firebase/client";
+import { auth, db } from "../firebase/client";
 import { useAuth } from "../context/auth";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -51,12 +51,22 @@ const PostForm = ({ isEditMode }: { isEditMode: boolean }) => {
             updatedAt: isEditMode ? Date.now() : null,
             authorId: fbUser.uid,
         };
-        setDoc(ref, post).then(() => {
+        setDoc(ref, post).then(async () => {
             const path = `/posts/${post.id}`;
-            fetch(`/api/revalidate?path=${path}`)
+            const token = await auth.currentUser?.getIdToken(true);
+            fetch(`/api/revalidate?path=${path}`, {
+                method: "POST",
+                headers: {
+                    Authorization: "Bearer " + token,
+                },
+            })
                 .then((res) => res.json())
                 .then((data) => {
                     alert(`記事を${isEditMode ? "編集" : "投稿"}しました。`);
+                })
+                .catch((e) => {
+                    console.log(e);
+                    alert("ページの再生成に失敗しました。");
                 });
         });
     };
