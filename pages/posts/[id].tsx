@@ -15,11 +15,17 @@ const PostDetailPage = () => {
 
     const user = useUser(post?.authorId);
 
+    /*
+    このままだと、毎回データ通信が走ってしまう。。。 => nextjsのメリットがない
+    一度誰かが見たら、そのデータをサーバーに置いておいて、それを見に行こうじゃないか！！
+    */
     useEffect(() => {
-        const ref = doc(db, `posts/${postId}`);
-        getDoc(ref).then((snap) => {
-            setPost(snap.data() as Post);
-        });
+        if (postId) {
+            const ref = doc(db, `posts/${postId}`);
+            getDoc(ref).then((snap) => {
+                setPost(snap.data() as Post);
+            });
+        }
     }, [postId]);
 
     if (!post) {
