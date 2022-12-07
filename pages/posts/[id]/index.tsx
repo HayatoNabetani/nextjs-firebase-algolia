@@ -35,9 +35,9 @@ export const getStaticPaths: GetStaticPaths = async (context) => {
     };
 };
 
-const PostDetailPage: NextPageWithLayout = ({
-    post,
-}: InferGetStaticPropsType<typeof getStaticProps>) => {
+const PostDetailPage: NextPageWithLayout<
+    InferGetStaticPropsType<typeof getStaticProps>
+> = ({ post }) => {
     const user = useUser(post?.authorId);
     const { fbUser } = useAuth();
     const isAuthor = fbUser?.uid === post?.authorId;
