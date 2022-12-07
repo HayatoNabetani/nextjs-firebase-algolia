@@ -4,11 +4,11 @@ import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import useSWR from "swr/immutable";
-import { db } from "../../firebase/client";
-import { adminDb } from "../../firebase/server";
-import { useUser } from "../../lib/user";
-import { Post } from "../../types/post";
-import { User } from "../../types/user";
+import { db } from "../../../firebase/client";
+import { adminDb } from "../../../firebase/server";
+import { useUser } from "../../../lib/user";
+import { Post } from "../../../types/post";
+import { User } from "../../../types/user";
 
 /* ここはnodejsの領域なので、/firebase/clientは使わないように！ */
 export const getStaticProps: GetStaticProps<{
