@@ -58,8 +58,8 @@ const CreatePost = () => {
                         {...register("title", {
                             required: "必須です。",
                             maxLength: {
-                                value: 50,
-                                message: "50文字以内",
+                                value: 100,
+                                message: "100文字以内",
                             },
                         })}
                         autoComplete="title"

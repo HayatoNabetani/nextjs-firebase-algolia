@@ -19,6 +19,7 @@ import { db } from "../firebase/client";
 import { User } from "../types/user";
 import { doc, getDoc } from "firebase/firestore";
 import useSWR from "swr/immutable";
+import Link from "next/link";
 
 const searchClient = algoliasearch(
     "B1MTY8H7DW",
@@ -39,7 +40,9 @@ const Hit: HitsProps<Post>["hitComponent"] = ({ hit }) => {
 
     return (
         <div className="rounded-md shadow p-4">
-            <h2>{hit.title}</h2>
+            <h2 className="line-clamp-3">
+                <Link href={`/posts/${hit.id}`}>{hit.title}</Link>
+            </h2>
             <p className="text-slate-500">
                 {format(hit.createdAt, "yyyy年MM月dd日")}
             </p>
@@ -48,7 +51,7 @@ const Hit: HitsProps<Post>["hitComponent"] = ({ hit }) => {
                     locale: ja,
                 })}
             </p>
-            {user && <p>{user.name}</p>}
+            {user && <p className="truncate">{user.name}</p>}
         </div>
     );
 };
