@@ -6,8 +6,11 @@ import { useAuth } from "../context/auth";
 import { useRouter } from "next/router";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/client";
+import { NextPageWithLayout } from "./_app";
+import { ReactElement } from "react";
+import Layout from "../components/layout";
 
-const CreateAccount = () => {
+const CreateAccount: NextPageWithLayout = () => {
     const { isLoading, fbUser } = useAuth();
     const router = useRouter();
 
@@ -124,6 +127,10 @@ const CreateAccount = () => {
             </form>
         </div>
     );
+};
+
+CreateAccount.getLayout = function getLayout(page: ReactElement) {
+    return <Layout>{page}</Layout>;
 };
 
 export default CreateAccount;

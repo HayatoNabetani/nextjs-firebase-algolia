@@ -1,10 +1,13 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
+import { ReactElement } from "react";
+import Layout from "../components/layout";
 import { useAuth } from "../context/auth";
 import styles from "../styles/Home.module.css";
+import { NextPageWithLayout } from "./_app";
 
-const Home: NextPage = () => {
+const Home: NextPageWithLayout = () => {
     const { user } = useAuth();
     console.log(user);
     return (
@@ -18,9 +21,16 @@ const Home: NextPage = () => {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
-            <main>{user?.name}</main>
+            <main>
+                <h1>TOP</h1>
+                <p>{user?.name}</p>
+            </main>
         </div>
     );
+};
+
+Home.getLayout = function getLayout(page: ReactElement) {
+    return <Layout>{page}</Layout>;
 };
 
 export default Home;
