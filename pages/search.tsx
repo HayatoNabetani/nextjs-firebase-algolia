@@ -1,4 +1,5 @@
 import algoliasearch from "algoliasearch/lite";
+import { ReactNode } from "react";
 // import {debounce} from "@types/debounce";
 import {
     Hits,
@@ -6,6 +7,7 @@ import {
     InstantSearch,
     SearchBox,
     SearchBoxProps,
+    useInstantSearch,
 } from "react-instantsearch-hooks-web";
 import { Post } from "../types/post";
 
@@ -16,6 +18,15 @@ const searchClient = algoliasearch(
 
 const Hit: HitsProps<Post>["hitComponent"] = ({ hit }) => {
     return <div>{hit.title}</div>;
+};
+
+const NoResultsBoundary = ({ children }: { children: ReactNode }) => {
+    const { results } = useInstantSearch();
+    if (!results.__isArtificial && results.nbHits === 0) {
+        return <p>[{results.query}]の検索結果はありませんでした。</p>;
+    }
+
+    return <>{children}</>;
 };
 
 const Search = () => {
@@ -29,7 +40,9 @@ const Search = () => {
                 {/* Todo: debounceでの検索ができないので、一旦飛ばす */}
                 {/* <SearchBox queryHook={debounce(serach, 2000)} /> */}
                 <SearchBox queryHook={serach} />
-                <Hits<Post> hitComponent={Hit} />
+                <NoResultsBoundary>
+                    <Hits<Post> hitComponent={Hit} />
+                </NoResultsBoundary>
             </InstantSearch>
         </div>
     );
