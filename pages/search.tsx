@@ -18,6 +18,7 @@ import ja from "date-fns/locale/ja";
 import { db } from "../firebase/client";
 import { User } from "../types/user";
 import { doc, getDoc } from "firebase/firestore";
+import useSWR from "swr/immutable";
 
 const searchClient = algoliasearch(
     "B1MTY8H7DW",
@@ -25,15 +26,14 @@ const searchClient = algoliasearch(
 );
 
 const Hit: HitsProps<Post>["hitComponent"] = ({ hit }) => {
-    const [user, setUser] = useState<User>();
-
-    // alogilaには、検索のやつだけのデータを入れる。idだけもたせる
-    useEffect(() => {
-        const ref = doc(db, `users/${hit.authorId}`);
-        getDoc(ref).then((snap) => {
-            setUser(snap.data() as User);
-        });
-    }, [hit]);
+    const { data: user } = useSWR(
+        hit.authorId && `users/${hit.authorId}`,
+        async () => {
+            const ref = doc(db, `users/${hit.authorId}`);
+            const snap = await getDoc(ref);
+            return snap.data() as User;
+        }
+    );
 
     // ただ、このままだと、件数分データから毎回アクセスしてデータを取ってくるので、なるべく1回で読み取りを終わらせたい・・・ => useSWRを使う
 
