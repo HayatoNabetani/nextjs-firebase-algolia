@@ -1,9 +1,11 @@
 import { format } from "date-fns";
 import { doc, getDoc } from "firebase/firestore";
 import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import useSWR from "swr/immutable";
+import { useAuth } from "../../../context/auth";
 import { db } from "../../../firebase/client";
 import { adminDb } from "../../../firebase/server";
 import { useUser } from "../../../lib/user";
@@ -50,6 +52,9 @@ const PostDetailPage = ({
     post,
 }: InferGetStaticPropsType<typeof getStaticProps>) => {
     const user = useUser(post?.authorId);
+    const { fbUser } = useAuth();
+    const isAuthor = fbUser?.uid === post?.authorId;
+
     if (!post) {
         return null;
     }
@@ -69,6 +74,7 @@ const PostDetailPage = ({
                 </div>
             )}
             <p>{post.body}</p>
+            {isAuthor && <Link href={`/posts/${post.id}/edit`}>編集</Link>}
         </div>
     );
 };

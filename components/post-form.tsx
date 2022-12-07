@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import Button from "../components/button";
 import { Post } from "../types/post";
 import classNames from "classnames";
-import { collection, doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/client";
 import { useAuth } from "../context/auth";
 import { useRouter } from "next/router";
@@ -71,6 +71,14 @@ const PostForm = ({ isEditMode }: { isEditMode: boolean }) => {
         });
     };
 
+    const deletePost = () => {
+        const ref = doc(db, `posts/${editTargetId}`);
+        return deleteDoc(ref).then(() => {
+            alert("記事を削除しました。");
+            router.push("/");
+        });
+    };
+
     return (
         <div>
             <h1>記事{isEditMode ? "編集" : "投稿"}</h1>
@@ -130,6 +138,9 @@ const PostForm = ({ isEditMode }: { isEditMode: boolean }) => {
                     )}
                 </div>
                 <Button type="submit">{isEditMode ? "更新" : "投稿"}</Button>
+                <button type="button" onClick={deletePost}>
+                    削除
+                </button>
             </form>
         </div>
     );
