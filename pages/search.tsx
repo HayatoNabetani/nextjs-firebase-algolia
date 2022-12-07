@@ -2,9 +2,11 @@ import algoliasearch from "algoliasearch/lite";
 import { ReactNode } from "react";
 // import {debounce} from "@types/debounce";
 import {
+    Configure,
     Hits,
     HitsProps,
     InstantSearch,
+    Pagination,
     SearchBox,
     SearchBoxProps,
     useInstantSearch,
@@ -54,8 +56,16 @@ const Search = () => {
                     )}
                     queryHook={serach}
                 />
+                <Configure hitsPerPage={2} />
                 <NoResultsBoundary>
                     <Hits<Post> hitComponent={Hit} />
+                    <Pagination
+                        classNames={{
+                            list: 'flex space-x-3',
+                            link: 'py-1 px-3 block',
+                            disabledItem: 'opacity-40',
+                            selectedItem: 'text-blue-500'
+                        }} />
                 </NoResultsBoundary>
             </InstantSearch>
         </div>
