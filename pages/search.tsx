@@ -20,6 +20,7 @@ import { User } from "../types/user";
 import { doc, getDoc } from "firebase/firestore";
 import useSWR from "swr/immutable";
 import Link from "next/link";
+import { useUser } from "../lib/user";
 
 const searchClient = algoliasearch(
     "B1MTY8H7DW",
@@ -27,16 +28,7 @@ const searchClient = algoliasearch(
 );
 
 const Hit: HitsProps<Post>["hitComponent"] = ({ hit }) => {
-    const { data: user } = useSWR(
-        hit.authorId && `users/${hit.authorId}`,
-        async () => {
-            const ref = doc(db, `users/${hit.authorId}`);
-            const snap = await getDoc(ref);
-            return snap.data() as User;
-        }
-    );
-
-    // ただ、このままだと、件数分データから毎回アクセスしてデータを取ってくるので、なるべく1回で読み取りを終わらせたい・・・ => useSWRを使う
+    const user = useUser(hit?.authorId);
 
     return (
         <div className="rounded-md shadow p-4">
