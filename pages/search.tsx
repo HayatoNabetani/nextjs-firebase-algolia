@@ -1,5 +1,5 @@
 import algoliasearch from "algoliasearch/lite";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 // import {debounce} from "@types/debounce";
 import {
     Configure,
@@ -13,6 +13,11 @@ import {
 } from "react-instantsearch-hooks-web";
 import { Post } from "../types/post";
 import { BeakerIcon } from "@heroicons/react/24/solid";
+import { format, formatDistance, formatDistanceToNow } from "date-fns";
+import ja from "date-fns/locale/ja";
+import { db } from "../firebase/client";
+import { User } from "../types/user";
+import { doc, getDoc } from "firebase/firestore";
 
 const searchClient = algoliasearch(
     "B1MTY8H7DW",
@@ -20,16 +25,51 @@ const searchClient = algoliasearch(
 );
 
 const Hit: HitsProps<Post>["hitComponent"] = ({ hit }) => {
-    return <div>{hit.title}</div>;
+    const [user, setUser] = useState<User>();
+
+    // alogilaには、検索のやつだけのデータを入れる。idだけもたせる
+    useEffect(() => {
+        const ref = doc(db, `users/${hit.authorId}`);
+        getDoc(ref).then((snap) => {
+            setUser(snap.data() as User);
+        });
+    }, [hit]);
+
+    // ただ、このままだと、件数分データから毎回アクセスしてデータを取ってくるので、なるべく1回で読み取りを終わらせたい・・・ => useSWRを使う
+
+    return (
+        <div className="rounded-md shadow p-4">
+            <h2>{hit.title}</h2>
+            <p className="text-slate-500">
+                {format(hit.createdAt, "yyyy年MM月dd日")}
+            </p>
+            <p className="text-slate-500">
+                {formatDistanceToNow(hit.createdAt, {
+                    locale: ja,
+                })}
+            </p>
+            {user && <p>{user.name}</p>}
+        </div>
+    );
 };
 
 const NoResultsBoundary = ({ children }: { children: ReactNode }) => {
     const { results } = useInstantSearch();
     if (!results.__isArtificial && results.nbHits === 0) {
-        return <p>[{results.query}]の検索結果はありませんでした。</p>;
+        return <p>「{results.query}」の検索結果はありませんでした。</p>;
     }
 
-    return <>{children}</>;
+    return (
+        <div>
+            {results.query && (
+                <p className="text-sm text-slate-500 my-4">
+                    「{results.query}」の検索結果が{results.nbHits}{" "}
+                    件見つかりました
+                </p>
+            )}
+            {children}
+        </div>
+    );
 };
 
 const Search = () => {
@@ -37,7 +77,7 @@ const Search = () => {
         hook(query);
     };
     return (
-        <div>
+        <div className="container">
             <h1>検索</h1>
             <InstantSearch searchClient={searchClient} indexName="posts">
                 {/* Todo: debounceでの検索ができないので、一旦飛ばす */}
@@ -58,14 +98,20 @@ const Search = () => {
                 />
                 <Configure hitsPerPage={2} />
                 <NoResultsBoundary>
-                    <Hits<Post> hitComponent={Hit} />
+                    <Hits<Post>
+                        classNames={{
+                            list: "space-y-4 my-6",
+                        }}
+                        hitComponent={Hit}
+                    />
                     <Pagination
                         classNames={{
-                            list: 'flex space-x-3',
-                            link: 'py-1 px-3 block',
-                            disabledItem: 'opacity-40',
-                            selectedItem: 'text-blue-500'
-                        }} />
+                            list: "flex space-x-3",
+                            link: "py-1 px-3 block",
+                            disabledItem: "opacity-40",
+                            selectedItem: "text-blue-500",
+                        }}
+                    />
                 </NoResultsBoundary>
             </InstantSearch>
         </div>
