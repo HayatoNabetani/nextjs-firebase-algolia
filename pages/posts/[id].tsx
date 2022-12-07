@@ -1,37 +1,58 @@
 import { format } from "date-fns";
 import { doc, getDoc } from "firebase/firestore";
+import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import useSWR from "swr/immutable";
 import { db } from "../../firebase/client";
+import { adminDb } from "../../firebase/server";
 import { useUser } from "../../lib/user";
 import { Post } from "../../types/post";
 import { User } from "../../types/user";
 
-const PostDetailPage = () => {
-    const [post, setPost] = useState<Post>();
-    const router = useRouter();
-    const postId = router.query.id;
+/* ここはnodejsの領域なので、/firebase/clientは使わないように！ */
+export const getStaticProps: GetStaticProps<{
+    post: Post;
+}> = async (context) => {
+    // 先にデータを作っておくよー
+    const snap = await adminDb.doc(`posts/${context.params?.id}`).get();
+    const post = snap.data() as Post;
 
+    return {
+        props: {
+            post: post,
+        },
+    };
+};
+
+/*
+あらかじめ、記事IDがあるのは事前に教えてよ〜〜〜
+ただ、頻繁にこういうのがある時は、わからん
+ビルドの旅に数万の記事をビルドするのは現実的ではない
+よって paths : []
+
+ローディングしますか？
+fallback: true
+これはページがないなら404
+fallback: false
+白い画面だよ
+fallback: 'blocking'
+*/
+
+export const getStaticPaths: GetStaticPaths = async (context) => {
+    return {
+        paths: [],
+        fallback: "blocking",
+    };
+};
+
+const PostDetailPage = ({
+    post,
+}: InferGetStaticPropsType<typeof getStaticProps>) => {
     const user = useUser(post?.authorId);
-
-    /*
-    このままだと、毎回データ通信が走ってしまう。。。 => nextjsのメリットがない
-    一度誰かが見たら、そのデータをサーバーに置いておいて、それを見に行こうじゃないか！！
-    */
-    useEffect(() => {
-        if (postId) {
-            const ref = doc(db, `posts/${postId}`);
-            getDoc(ref).then((snap) => {
-                setPost(snap.data() as Post);
-            });
-        }
-    }, [postId]);
-
     if (!post) {
         return null;
     }
-
     return (
         <div className="container">
             <div className="aspect-video rounded-md bg-slate-200 mb-4"></div>
