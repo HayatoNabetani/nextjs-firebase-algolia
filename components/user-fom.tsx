@@ -6,17 +6,21 @@ import { useAuth } from "../context/auth";
 import { useRouter } from "next/router";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/client";
-import { ReactElement, useCallback } from "react";
+import { ChangeEvent, ReactElement, useCallback, useState } from "react";
 import Layout from "../components/layout";
 import { useDropzone } from "react-dropzone";
 import { PhotoIcon } from "@heroicons/react/24/solid";
+import AvatarEditor from "react-avatar-editor";
 
 const UserForm = ({ isEditMode }: { isEditMode: boolean }) => {
     const { isLoading, fbUser } = useAuth();
     const router = useRouter();
+    const [selectedImage, setSelectedImage] = useState<File>();
+    const [scale, setScale] = useState<number>(1.5);
 
     const onDropAccepted = useCallback((acceptedFiles: File[]) => {
         // Do something with the files
+        setSelectedImage(acceptedFiles[0]);
     }, []);
     const { getRootProps, getInputProps, isDragAccept } = useDropzone({
         onDropAccepted,
@@ -39,6 +43,11 @@ const UserForm = ({ isEditMode }: { isEditMode: boolean }) => {
     if (!fbUser) {
         return null;
     }
+
+    const handleScaleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setScale(parseFloat(e.target.value));
+    };
+
     const onSubmit: SubmitHandler<User> = (data: User) => {
         console.log(data);
         const ref = doc(db, `users/${fbUser.uid}`);
@@ -67,6 +76,28 @@ const UserForm = ({ isEditMode }: { isEditMode: boolean }) => {
                         </div>
                         <input className="hidden" {...getInputProps()} />
                     </div>
+                    {selectedImage && (
+                        <div>
+                            <AvatarEditor
+                                image={selectedImage}
+                                width={250}
+                                height={250}
+                                border={50}
+                                borderRadius={125}
+                                color={[255, 255, 255, 0.6]} // RGBA
+                                scale={scale}
+                                rotate={0}
+                            />
+                            <input
+                                type="range"
+                                min={1}
+                                max={ 2} 
+                                step={0.1} 
+                                // defalutValue={1.5}
+                                onChange={handleScaleChange}
+                            />
+                        </div>
+                    )}
                 </div>
                 <div>
                     <label className="block mb-0.5" htmlFor="name">
