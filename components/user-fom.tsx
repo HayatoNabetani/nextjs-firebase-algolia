@@ -42,7 +42,7 @@ const UserForm = ({ isEditMode }: { isEditMode: boolean }) => {
     if (!fbUser) {
         return null;
     }
-
+    // このままだと、途中で切れてしまったら、変な挙動があり得る。 => 本来はサーバーでやるのがいいかもね。
     const onSubmit: SubmitHandler<User> = async (data: User) => {
         if (data.avatarURL?.match(/^data:/)) {
             const imageRef = ref(storage, `/users/${fbUser.uid}/avater`);
