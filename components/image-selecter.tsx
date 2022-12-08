@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { ChangeEvent, useCallback, useState, Fragment } from "react";
+import { ChangeEvent, useCallback, useState, Fragment, useRef } from "react";
 import AvatarEditor from "react-avatar-editor";
 import { PhotoIcon } from "@heroicons/react/24/solid";
 import { useDropzone } from "react-dropzone";
@@ -9,6 +9,8 @@ const ImageSelecter = () => {
     const [selectedImage, setSelectedImage] = useState<File | null>();
     const [scale, setScale] = useState<number>(1.5);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [preview, setPreview] = useState<string | null>();
+    const ref = useRef<AvatarEditor>(null);
     const handleScaleChange = (e: ChangeEvent<HTMLInputElement>) => {
         setScale(parseFloat(e.target.value));
     };
@@ -30,21 +32,49 @@ const ImageSelecter = () => {
         setIsModalOpen(false);
     };
 
+    const getCroppedImage = () => {
+        const image = ref.current?.getImage();
+        const canvas = document.createElement("canvas");
+        canvas.width = 80;
+        canvas.height = 80;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(image!, 0, 0, 80, 80);
+
+        setPreview(canvas.toDataURL("image/png"));
+        closeModal();
+    };
+
     return (
         <div>
             <div
                 className={classNames(
-                    "aspect-square w-40 grid content-center hover:cursor-pointer hover:bg-blue-100 border-slate-300 border-2 rounded-md border-dashed",
+                    "aspect-square relative rounded-full overflow-hidden w-40 grid content-center hover:cursor-pointer hover:bg-blue-100 border-slate-300 border-2 border-dashed",
                     isDragAccept && "bg-blue-200"
                 )}
                 {...getRootProps()}
             >
-                <div className="text-center">
+                {preview && (
+                    <img
+                        src={preview}
+                        alt=""
+                        className="absolute top-0 left-0 w-full h-full block"
+                    />
+                )}
+                <div className="text-center relative z-5">
                     <PhotoIcon className="w-10 mx-auto h-10 text-slate-400" />
                     <p className="text-slate-400 text-sm">画像を選択</p>
                 </div>
                 <input className="hidden" {...getInputProps()} />
             </div>
+
+            {preview && (
+                <button
+                    className="text-sm text-slate-600 mt-2"
+                    onClick={() => setPreview(null)}
+                >
+                    削除
+                </button>
+            )}
 
             <Transition appear show={isModalOpen} as={Fragment}>
                 <Dialog as="div" className="relative z-10" onClose={closeModal}>
@@ -75,6 +105,7 @@ const ImageSelecter = () => {
                                     {selectedImage && (
                                         <div>
                                             <AvatarEditor
+                                                ref={ref}
                                                 image={selectedImage}
                                                 width={250}
                                                 height={250}
@@ -101,7 +132,10 @@ const ImageSelecter = () => {
                                         >
                                             閉じる
                                         </button>
-                                        <button className="px-3 py-2 rounded-full bg-blue-500 text-white">
+                                        <button
+                                            className="px-3 py-2 rounded-full bg-blue-500 text-white"
+                                            onClick={getCroppedImage}
+                                        >
                                             保存
                                         </button>
                                     </div>
