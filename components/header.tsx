@@ -23,7 +23,7 @@ const Header = () => {
 
     return (
         <>
-            <header className="py-4">
+            <header className="relative z-10 py-4">
                 <div className="flex items-center h-16 border-b container">
                     <button className="p-2 mr-1" onClick={openModal}>
                         <Bars3Icon className="w-6 h-6" />
