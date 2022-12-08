@@ -1,34 +1,20 @@
-import Button from "../components/button";
-import { useForm, SubmitHandler } from "react-hook-form";
 import classNames from "classnames";
-import { User } from "../types/user";
-import { useAuth } from "../context/auth";
-import { useRouter } from "next/router";
 import { doc, setDoc } from "firebase/firestore";
-import { db } from "../firebase/client";
-import { ChangeEvent, ReactElement, useCallback, useState } from "react";
+import { useRouter } from "next/router";
+import { ReactElement } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import Button from "../components/button";
 import Layout from "../components/layout";
-import { useDropzone } from "react-dropzone";
-import { PhotoIcon } from "@heroicons/react/24/solid";
-import AvatarEditor from "react-avatar-editor";
+import { useAuth } from "../context/auth";
+import { db } from "../firebase/client";
+import { User } from "../types/user";
+
+
+import ImageSelecter from "./image-selecter";
 
 const UserForm = ({ isEditMode }: { isEditMode: boolean }) => {
     const { isLoading, fbUser } = useAuth();
     const router = useRouter();
-    const [selectedImage, setSelectedImage] = useState<File>();
-    const [scale, setScale] = useState<number>(1.5);
-
-    const onDropAccepted = useCallback((acceptedFiles: File[]) => {
-        // Do something with the files
-        setSelectedImage(acceptedFiles[0]);
-    }, []);
-    const { getRootProps, getInputProps, isDragAccept } = useDropzone({
-        onDropAccepted,
-        accept: {
-            "image/png": [],
-            "image/jpeg": [],
-        },
-    });
 
     const {
         register,
@@ -44,9 +30,6 @@ const UserForm = ({ isEditMode }: { isEditMode: boolean }) => {
         return null;
     }
 
-    const handleScaleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        setScale(parseFloat(e.target.value));
-    };
 
     const onSubmit: SubmitHandler<User> = (data: User) => {
         console.log(data);
@@ -63,41 +46,7 @@ const UserForm = ({ isEditMode }: { isEditMode: boolean }) => {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div>
                     <h2 className="block mb-0.5">プロフィール画像</h2>
-                    <div
-                        className={classNames(
-                            "aspect-square w-40 grid content-center hover:cursor-pointer hover:bg-blue-100 border-slate-300 border-2 rounded-md border-dashed",
-                            isDragAccept && "bg-blue-200"
-                        )}
-                        {...getRootProps()}
-                    >
-                        <div className="text-center">
-                            <PhotoIcon className="w-10 mx-auto h-10 text-slate-400" />
-                            <p className="text-slate-400 text-sm">画像を選択</p>
-                        </div>
-                        <input className="hidden" {...getInputProps()} />
-                    </div>
-                    {selectedImage && (
-                        <div>
-                            <AvatarEditor
-                                image={selectedImage}
-                                width={250}
-                                height={250}
-                                border={50}
-                                borderRadius={125}
-                                color={[255, 255, 255, 0.6]} // RGBA
-                                scale={scale}
-                                rotate={0}
-                            />
-                            <input
-                                type="range"
-                                min={1}
-                                max={ 2} 
-                                step={0.1} 
-                                // defalutValue={1.5}
-                                onChange={handleScaleChange}
-                            />
-                        </div>
-                    )}
+                    <ImageSelecter />
                 </div>
                 <div>
                     <label className="block mb-0.5" htmlFor="name">
