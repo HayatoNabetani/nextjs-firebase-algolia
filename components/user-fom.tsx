@@ -27,7 +27,7 @@ const UserForm = ({ isEditMode }: { isEditMode: boolean }) => {
         watch,
         reset,
         control,
-        formState: { errors },
+        formState: { errors, isSubmitting },
     } = useForm<User>();
 
     useEffect(() => {
@@ -56,7 +56,7 @@ const UserForm = ({ isEditMode }: { isEditMode: boolean }) => {
         }
 
         const documentRef = doc(db, `users/${fbUser.uid}`);
-        setDoc(documentRef, data).then(() => {
+        return setDoc(documentRef, data).then(() => {
             alert(isEditMode ? `更新しました。` : `ユーザーを作成しました。`);
             if (!isEditMode) {
                 router.push("/");
@@ -156,7 +156,7 @@ const UserForm = ({ isEditMode }: { isEditMode: boolean }) => {
                     )}
                 </div>
 
-                <Button type="submit">
+                <Button disabled={isSubmitting} type="submit">
                     {isEditMode ? "更新" : "アカウント作成"}
                 </Button>
             </form>
