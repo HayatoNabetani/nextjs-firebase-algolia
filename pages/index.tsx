@@ -16,6 +16,7 @@ export const getStaticProps: GetStaticProps<{
     const snap = await adminDb
         .collection("posts")
         .orderBy("createdAt", "desc")
+        .limit(20)
         .get();
     const posts = snap.docs.map((doc) => doc.data() as Post);
 

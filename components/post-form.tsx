@@ -138,9 +138,11 @@ const PostForm = ({ isEditMode }: { isEditMode: boolean }) => {
                     )}
                 </div>
                 <Button type="submit">{isEditMode ? "更新" : "投稿"}</Button>
-                <button type="button" onClick={deletePost}>
-                    削除
-                </button>
+                {isEditMode && (
+                    <button type="button" onClick={deletePost}>
+                        削除
+                    </button>
+                )}
             </form>
         </div>
     );

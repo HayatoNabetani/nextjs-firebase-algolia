@@ -8,7 +8,11 @@ const CreatePost: NextPageWithLayout = () => {
 };
 
 CreatePost.getLayout = function getLayout(page: ReactElement) {
-    return <Layout>{page}</Layout>;
+    return (
+        <div className="container mt-6">
+            <Layout>{page}</Layout>
+        </div>
+    );
 };
 
 export default CreatePost;

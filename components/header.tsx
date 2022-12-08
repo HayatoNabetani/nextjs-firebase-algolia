@@ -37,7 +37,11 @@ const Header = () => {
                         />
                     </Link>
                     <span className="flex-1"></span>
-                    {/* ↑これおもろいな */}
+                    {user && (
+                        <Link href="/create-post" className="mr-4">
+                            投稿
+                        </Link>
+                    )}
                     {user ? <UserMenu /> : <Link href="/login">ログイン</Link>}
                 </div>
             </header>
