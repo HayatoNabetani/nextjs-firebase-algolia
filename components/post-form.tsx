@@ -7,6 +7,7 @@ import { auth, db } from "../firebase/client";
 import { useAuth } from "../context/auth";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { revalidate } from "../lib/revalidate";
 
 const PostForm = ({ isEditMode }: { isEditMode: boolean }) => {
     const {
@@ -52,14 +53,8 @@ const PostForm = ({ isEditMode }: { isEditMode: boolean }) => {
             authorId: fbUser.uid,
         };
         setDoc(ref, post).then(async () => {
-            const path = `/posts/${post.id}`;
-            const token = await auth.currentUser?.getIdToken(true);
-            fetch(`/api/revalidate?path=${path}`, {
-                method: "POST",
-                headers: {
-                    Authorization: "Bearer " + token,
-                },
-            })
+            await revalidate("/");
+            return revalidate(`/posts/${post.id}`)
                 .then((res) => res.json())
                 .then((data) => {
                     alert(`記事を${isEditMode ? "編集" : "投稿"}しました。`);
@@ -71,10 +66,15 @@ const PostForm = ({ isEditMode }: { isEditMode: boolean }) => {
         });
     };
 
-    const deletePost = () => {
+    const deletePost = async () => {
+        await revalidate("/");
         const ref = doc(db, `posts/${editTargetId}`);
-        return deleteDoc(ref).then(() => {
+        return deleteDoc(ref).then(async () => {
             alert("記事を削除しました。");
+
+            await revalidate("/");
+            revalidate(`/posts/${editTargetId}`);
+
             router.push("/");
         });
     };
