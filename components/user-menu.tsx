@@ -1,6 +1,7 @@
 import { Menu, Transition } from "@headlessui/react";
 import Link from "next/link";
 import { forwardRef, Fragment, ReactNode } from "react";
+import { useAuth } from "../context/auth";
 import { logout } from "../lib/auth";
 
 const items = [
@@ -31,10 +32,16 @@ const MyLink = forwardRef<
 });
 
 const UserMenu = () => {
+    const { user } = useAuth();
+    if (!user) {
+        return null;
+    }
     return (
         <Menu as="div" className="relative inline-block text-left">
             <div>
-                <Menu.Button className="block bg-slate-300 rounded-full w-9 h-9"></Menu.Button>
+                <Menu.Button className="block rounded-full w-9 h-9 overflow-hidden">
+                    <img src={user.avatarURL} alt="" className="w-full h-full object-cover block"/>
+                </Menu.Button>
             </div>
             <Transition
                 as={Fragment}
