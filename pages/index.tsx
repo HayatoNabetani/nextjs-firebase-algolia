@@ -9,6 +9,12 @@ import { adminDb } from "../firebase/server";
 import styles from "../styles/Home.module.css";
 import { Post } from "../types/post";
 import { NextPageWithLayout } from "./_app";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, Keyboard } from "swiper";
+import { ArrowRightIcon, ArrowLeftIcon } from "@heroicons/react/24/solid";
+;
+// Import Swiper styles
+import "swiper/css";
 
 export const getStaticProps: GetStaticProps<{
     posts: Post[];
@@ -44,6 +50,59 @@ const Home: NextPageWithLayout<
             </Head>
 
             <main>
+                <div>
+                    <div className="relative">
+                        <Swiper
+                            modules={[Navigation, Pagination, Keyboard]}
+                            loop
+                            navigation={{
+                                nextEl: "#next",
+                                prevEl: "#prev",
+                            }}
+                            keyboard
+                            pagination={{
+                                el: "#pagination",
+                                bulletClass:
+                                    "w-2 h-2 rounded-full block bg-slate-300 cursor-pointer",
+                                bulletActiveClass: "!bg-blue-500",
+                                clickable: true,
+                            }}
+                            spaceBetween={50}
+                            slidesPerView={1}
+                        >
+                            {new Array(5).fill(null).map((_, index) => {
+                                return (
+                                    <SwiperSlide key={index}>
+                                        <div className="bg-slate-200 aspect-video grid place-items-center">
+                                            <p className="text-3xl font-bold text-blue-500">
+                                                {index}
+                                            </p>
+                                        </div>
+                                    </SwiperSlide>
+                                );
+                            })}
+                        </Swiper>
+
+                        <div
+                            id="next"
+                            className="p-4 absolute top-1/2 z-10 right-0 -translate-y-1/2"
+                        >
+                            <ArrowRightIcon className="w-8 h-8 opacity-40" />
+                        </div>
+                        <div
+                            id="prev"
+                            className="p-4 absolute top-1/2 z-10 left-0 -translate-y-1/2"
+                        >
+                            <ArrowLeftIcon className="w-8 h-8 opacity-40" />
+                        </div>
+                    </div>
+
+                    <div
+                        id="pagination"
+                        className="flex space-x-2 justify-center mt-4"
+                    ></div>
+                </div>
+
                 <h2>最新の記事</h2>
                 {posts?.length ? (
                     <ul className="space-y-3">
