@@ -4,12 +4,24 @@ import AvatarEditor from "react-avatar-editor";
 import { PhotoIcon } from "@heroicons/react/24/solid";
 import { useDropzone } from "react-dropzone";
 import { Dialog, Transition } from "@headlessui/react";
+import { useController, UseControllerProps } from "react-hook-form";
 
-const ImageSelecter = () => {
+const ImageSelecter = ({
+    control,
+    name,
+}: {
+    control: any; // Todo: UseControllerProps<T>では、型 'T' は制約 'FieldValues' を満たしていません。みたいなエラーが出て進まないので、anyでスキップする
+    name: string;
+}) => {
     const [selectedImage, setSelectedImage] = useState<File | null>();
     const [scale, setScale] = useState<number>(1.5);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [preview, setPreview] = useState<string | null>();
+
+    const { field } = useController({
+        name,
+        control,
+    }); // どのフォームと接続するか？
+
     const ref = useRef<AvatarEditor>(null);
     const handleScaleChange = (e: ChangeEvent<HTMLInputElement>) => {
         setScale(parseFloat(e.target.value));
@@ -40,7 +52,7 @@ const ImageSelecter = () => {
         const ctx = canvas.getContext("2d");
         ctx?.drawImage(image!, 0, 0, 80, 80);
 
-        setPreview(canvas.toDataURL("image/png"));
+        field.onChange(canvas.toDataURL("image/png"));
         closeModal();
     };
 
@@ -53,9 +65,9 @@ const ImageSelecter = () => {
                 )}
                 {...getRootProps()}
             >
-                {preview && (
+                {field.value && (
                     <img
-                        src={preview}
+                        src={field.value as string}
                         alt=""
                         className="absolute top-0 left-0 w-full h-full block"
                     />
@@ -67,10 +79,10 @@ const ImageSelecter = () => {
                 <input className="hidden" {...getInputProps()} />
             </div>
 
-            {preview && (
+            {field.value && (
                 <button
                     className="text-sm text-slate-600 mt-2"
-                    onClick={() => setPreview(null)}
+                    onClick={() => field.onChange("")}
                 >
                     削除
                 </button>
