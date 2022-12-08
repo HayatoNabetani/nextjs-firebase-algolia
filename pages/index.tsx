@@ -1,13 +1,33 @@
-import type { NextPage } from "next";
+import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import { ReactElement } from "react";
 import Layout from "../components/layout";
 import { useAuth } from "../context/auth";
+import { adminDb } from "../firebase/server";
 import styles from "../styles/Home.module.css";
+import { Post } from "../types/post";
 import { NextPageWithLayout } from "./_app";
 
-const Home: NextPageWithLayout = () => {
+export const getStaticProps: GetStaticProps<{
+    post: Post[];
+}> = async (context) => {
+    const snap = await adminDb
+        .collection("posts")
+        .orderBy("createdAt", "desc")
+        .get();
+    const posts = snap.docs.map((doc) => doc.data() as Post);
+
+    return {
+        props: {
+            post: posts,
+        },
+    };
+};
+
+const Home: NextPageWithLayout<
+    InferGetStaticPropsType<typeof getStaticProps>
+> = ({ posts }) => {
     const { user } = useAuth();
     console.log(user);
     return (
@@ -24,6 +44,16 @@ const Home: NextPageWithLayout = () => {
             <main>
                 <h1>TOP</h1>
                 <p>{user?.name}</p>
+
+                {posts?.length ? (
+                    <ul>
+                        {posts?.map((post: Post) => (
+                            <li key={post.id}>{post.title}</li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p>記事がありません。</p>
+                )}
             </main>
         </div>
     );
