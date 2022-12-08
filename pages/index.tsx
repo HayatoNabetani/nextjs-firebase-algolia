@@ -3,6 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 import { ReactElement } from "react";
 import Layout from "../components/layout";
+import PostItemCard from "../components/post-item-card";
 import { useAuth } from "../context/auth";
 import { adminDb } from "../firebase/server";
 import styles from "../styles/Home.module.css";
@@ -10,7 +11,7 @@ import { Post } from "../types/post";
 import { NextPageWithLayout } from "./_app";
 
 export const getStaticProps: GetStaticProps<{
-    post: Post[];
+    posts: Post[];
 }> = async (context) => {
     const snap = await adminDb
         .collection("posts")
@@ -20,7 +21,7 @@ export const getStaticProps: GetStaticProps<{
 
     return {
         props: {
-            post: posts,
+            posts: posts,
         },
     };
 };
@@ -42,13 +43,13 @@ const Home: NextPageWithLayout<
             </Head>
 
             <main>
-                <h1>TOP</h1>
-                <p>{user?.name}</p>
-
+                <h2>最新の記事</h2>
                 {posts?.length ? (
-                    <ul>
+                    <ul className="space-y-3">
                         {posts?.map((post: Post) => (
-                            <li key={post.id}>{post.title}</li>
+                            <li key={post.id}>
+                                <PostItemCard post={post} />
+                            </li>
                         ))}
                     </ul>
                 ) : (
